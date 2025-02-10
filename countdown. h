@@ -1,0 +1,30 @@
+
+
+#ifndef _SEVENSEGMENT6DIGIT_H
+#define _SEVENSEGMENT6DIGIT_H
+
+
+#include <Arduino.h>
+
+// common cathode
+ 
+class SevenSegment6Digit
+{
+    private:
+        uint8_t digitPins[6];
+        uint8_t segmentPins[8];
+        uint8_t segCode[6]; 
+        
+    public:
+        SevenSegment6Digit( );
+        void begin(uint8_t digitPinsIn[],
+                   uint8_t segmentPinsIn[]);
+        uint8_t getSegCodeFromNumber(uint8_t num);   
+        void set_number(uint8_t digitIdx, uint8_t num);
+        void writeSegCodeAtDigit(int digitIdx, 
+                                 uint8_t sc);
+        void refreshDisplay();
+        void displayOff();
+};
+
+#endif
