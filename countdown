@@ -1,0 +1,123 @@
+
+
+
+#include "SevenSegment6Digit.h"
+
+ 
+//===========================================    
+SevenSegment6Digit::SevenSegment6Digit( )
+{
+    
+}
+
+//===========================================
+void SevenSegment6Digit::begin(uint8_t digitPinsIn[],
+                          uint8_t segmentPinsIn[])
+{
+    for (int i=0; i<6; i++)
+    {
+        digitPins[i] = digitPinsIn[i];
+        pinMode(digitPins[i], OUTPUT);
+        digitalWrite(digitPins[i], HIGH);
+    }
+    for (int i=0;i<8; i++)
+    {        
+       segmentPins[i] = segmentPinsIn[i];
+        pinMode(segmentPins[i], OUTPUT);
+        digitalWrite(segmentPins[i], LOW);
+    }
+}
+
+
+//=================================================
+uint8_t SevenSegment6Digit::getSegCodeFromNumber(uint8_t num)
+{
+    uint8_t val = 0x00;
+    if (num>=0 && num<=9)
+    {
+        const uint8_t digitCodeMap[] = {
+            // GFEDCBA  Segments      7-segment map:
+            0b00111111, // 0   "0"          AAA
+            0b00000110, // 1   "1"         F   B
+            0b01011011, // 2   "2"         F   B
+            0b01001111, // 3   "3"          GGG
+            0b01100110, // 4   "4"         E   C
+            0b01101101, // 5   "5"         E   C
+            0b01111101, // 6   "6"          DDD
+            0b00000111, // 7   "7"
+            0b01111111, // 8   "8"
+            0b01101111, // 9   "9"
+        
+        };
+        return digitCodeMap[num];
+    }
+}
+
+//====================================================
+void SevenSegment6Digit::set_number(uint8_t digitIdx, 
+                                    uint8_t num)
+{
+    if (digitIdx<0 || digitIdx>=6) 
+            return;
+    segCode[digitIdx] = getSegCodeFromNumber(num);
+}
+
+//====================================================
+void SevenSegment6Digit::refreshDisplay()
+{
+    for (int digitIdx = 0; digitIdx < 6; digitIdx++)
+    {
+        // Turn off all digits
+        for (int i = 0; i < 6; i++)
+        {
+            digitalWrite(digitPins[i], HIGH);
+        }
+/*
+        // Set the segment pins based on the segment code
+        for (int segmentIdx = 0; segmentIdx < 8; segmentIdx++)
+        {
+            uint8_t  sc = segCode[digitIdx];
+            if (digitIdx==1 || digitIdx ==3)
+                sc = sc | 0x80; // show colon
+            bool bSegOn=  ((sc >> segmentIdx) & 0x01 == 0x01);
+            digitalWrite(segmentPins[segmentIdx], bSegOn ? HIGH : LOW);
+        }
+
+        // Turn on the current digit
+        digitalWrite(digitPins[digitIdx], LOW);
+*/
+        uint8_t  sc = segCode[digitIdx];
+        if (digitIdx==1 || digitIdx ==3)
+                sc = sc | 0x80; // show colon
+        writeSegCodeAtDigit(digitIdx, sc);
+
+        // Add a delay to control the digit refresh rate (if needed)
+        delay(1);
+    }
+}
+//======================================================
+void SevenSegment6Digit::writeSegCodeAtDigit(int digitIdx, 
+                                            uint8_t sc)
+{
+    if (digitIdx<0 || digitIdx>=6)
+        return;
+        
+    // Set the segment pins based on the segment code
+    for (int segmentIdx = 0; segmentIdx < 8; segmentIdx++)
+    {  
+        bool bSegOn=  ((sc >> segmentIdx) & 0x01 == 0x01);
+        digitalWrite(segmentPins[segmentIdx], bSegOn ? HIGH : LOW);
+    }
+
+    // Turn on the current digit
+    digitalWrite(digitPins[digitIdx], LOW);
+}
+
+//======================================================
+void SevenSegment6Digit::displayOff()
+{
+    for (int i = 0; i < 6; i++)
+    {
+        segCode[i] = 0x00;
+    }
+}
